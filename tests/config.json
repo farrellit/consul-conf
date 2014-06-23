@@ -1,0 +1,31 @@
+{ 
+  "template": "test-template.erb",
+  "outfile": "output.txt",
+  "comment_regex": "^\\s*#",
+  "postupdate": "cp output.txt output.txt.copy",
+  "postupdate_status": 0,
+  "services": [ 
+     {
+        "name": "service1",
+        "port": 8080,
+        "cookie": true,
+        "check": "inter 3000 rise 2 fall 3 maxconn 255",
+        "options": [ 
+            "httpchk GET /ping"
+        ]
+    },
+    {
+        "name": "service2",
+        "port": 8081,
+        "cookie": false,
+        "check": "inter 3000 rise 2 fall 3 maxconn 255",
+        "options": [ 
+            "httpchk GET /ping"
+        ]
+    }
+  ],
+  "consul": {
+    "host": "localhost", 
+    "port": 8500
+  }
+}
