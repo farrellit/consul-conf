@@ -1,5 +1,5 @@
 
-require_relative "../lib/ConsulConf.rb"
+require_relative "../lib/consul-conf.rb"
 
 ### Start up webserver and wait for it to be ready
 

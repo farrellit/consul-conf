@@ -4,7 +4,7 @@ require 'curb'
 require 'logger'
 
 class ConsulConf
-class ServiceBackends
+  class ServiceBackends
 
     class RestException < Exception
         def initialize msg=""
@@ -28,7 +28,7 @@ class ServiceBackends
         @curler.url = "#{@base_url}#{path}"
         @log.debug "Pulling #{@curler.url}"
         begin
-            unless @curler.perform 
+            unless @curler.perform
                 raise RestException.new "Failed to perform Curl for #{ @curler.url }"
             end
             JSON.parse @curler.body_str
@@ -47,8 +47,8 @@ class ServiceBackends
             check["ServiceName"] == service || check["CheckID"] == 'serfHealth'
         }
     end
-    
-    def passingStatus? check 
+
+    def passingStatus? check
         if check.kind_of? Hash
             status = check['Status']
             @log.debug "Check status of #{check['CheckID']} is #{status}"
@@ -66,7 +66,7 @@ class ServiceBackends
             if check["CheckID"] == 'serfHealth'
                 serf_health = passingStatus? check
             else
-                service_health = service_health && passingStatus?( check ) 
+                service_health = service_health && passingStatus?( check )
             end
         }
         @log.debug "Combined service #{service} health is #{service_health}, serf health is #{serf_health}"
@@ -77,15 +77,15 @@ class ServiceBackends
         nodes = getUrl "/v1/catalog/service/#{service}"
         servers = []
         nodes.each do |node|
-            
+
             if getServiceHealth node['Node'], service
                 status = 'up'
             else
                 status = 'down'
             end
-            servers << { 
+            servers << {
                 "name" => node["Node"],
-                "ip" => node["Address"], 
+                "ip" => node["Address"],
                 "port" => node["ServicePort"],
                 "status" => status,
                 "health_checks" => getHealthChecks(node["Node"], service)
@@ -107,5 +107,5 @@ class ServiceBackends
         services
     end
 
-end
+  end
 end

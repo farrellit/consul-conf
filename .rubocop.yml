@@ -4,10 +4,6 @@ AllCops:
     - metadata.rb
     - tests/**
 
-SingleSpaceBeforeFirstArg:
-  # This was not allowing lining up arguments to LWRPs. Making it not enabled helps readability.
-  Enabled: false
-
 RedundantReturn:
   # Allow specifying return at the end of a function even though it is implied. Explicit code is good.
   Enabled: false

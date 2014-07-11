@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
     a new config file, if updates are required.'
   s.authors     = ['Dan Farrell']
   s.email       = 'dfarrell@bloomhealthco.com'
-  s.files       = ['lib/ConsulConf.rb', 'lib/consul-conf/ServiceBackends.rb']
+  s.files       = ['lib/consul-conf.rb', 'lib/consul-conf/ServiceBackends.rb']
   s.homepage    = 'http://github.com/dfarrell-bloom/consul-conf'
   s.license       = 'MIT'
 
