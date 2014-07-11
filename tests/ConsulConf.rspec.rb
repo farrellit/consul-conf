@@ -3,7 +3,7 @@ require_relative "../lib/ConsulConf.rb"
 
 ### Start up webserver and wait for it to be ready
 
-require_relative 'include-mock.rb'
+require_relative './include-mock.rb'
 
 require 'tempfile'
 require 'json'
@@ -30,8 +30,18 @@ def valid_config
     JSON.parse File.read( "config.json" )
 end
 
+class ATime 
+    @@time = nil
+    def initialize
+        @@time = Time.new unless @@time
+    end
+    def to_s
+        @@time.to_s
+    end
+end
+
 def expected_rendering input = nil
-        input = Time.new unless input
+        input = ATime.new unless input
         return <<-eof
 # This is a test template to check rendering generated #{input}
 
@@ -106,12 +116,12 @@ describe ConsulConf do
     end 
 
     it "should identify existing and nonexisting config sections as such" do
-        expect( cc.checkConfigOption 'template').to eq( true )
-        expect( cc.checkConfigOption 'nonexistant_config_option').to eq( false )
+        expect(cc.checkConfigOption 'template').to eq( true )
+        expect(cc.checkConfigOption 'nonexistant_config_option').to eq( false )
     end
 
     it "should correctly render" do
-        expect( cc.render).to eq( expected_rendering )
+        expect(cc.render).to eq( expected_rendering )
     end
 
     it "should properly remove comments" do
@@ -141,7 +151,7 @@ listen service2 0.0.0.0:8081
         f2 = File.open( "f2", "w+")
         rewrite f1, "This is a bunch of content that is not the same.  #{rand}"
         rewrite f2, "This is a bunch of content that is not the same.  #{rand}"
-        expect( f2.read == f2.read ).to eq(false)
+        expect(f2.read == f2.read ).to eq(false)
         expect($log).to receive('debug').with("Executing diff command: diff f1 f2")
         expect(cc.diff(f1.path, f2.path) ).to eq(true)
         [ f1, f2].each do |f|
@@ -158,25 +168,25 @@ listen service2 0.0.0.0:8081
     it "should write out file if one doesn't exist" do
         cleanup
         cc.update 
-        expect( File.exists? cc.config['outfile'] ).to eq( true )
+        expect(File.exists? cc.config['outfile'] ).to eq( true )
         expect(expected_rendering ).to eq( File.read cc.config['outfile'] )
     end
 
     it "should identify equal content as not outdated" do
-        expect( cc.outdated? File.read( cc.config['outfile'] ) ).to eq( false )
+        expect(cc.outdated? File.read( cc.config['outfile'] ) ).to eq( false )
     end
 
     it "should identify equal content with different comments as not outdated" do
-        expect( cc.outdated? expected_rendering( "This is not the date we wrote out!") ).to eq(false)
+        expect(cc.outdated? expected_rendering( "This is not the date we wrote out!") ).to eq(false)
     end
 
     it "should identify out of date content as such"  do
-        expect( cc.outdated? expected_rendering + "\nnThese are brand new lines!" ).to eq(true)
+        expect(cc.outdated? expected_rendering + "\nnThese are brand new lines!" ).to eq(true)
     end
 
     it "should properly run postupdate command with the postupdate function" do
-        expect( cc.postupdate ).to eq( true )
-        expect( File.exists? "#{cc.config['outfile']}.copy" ).to eq(true)
+        expect(cc.postupdate ).to eq( true )
+        expect(File.exists? "#{cc.config['outfile']}.copy" ).to eq(true)
     end
 
     it "should log an error and update should return false if the postupdate status is not expected" do
@@ -184,8 +194,8 @@ listen service2 0.0.0.0:8081
         config['postupdate'] = 'false'  ## that is, the false command
         rewrite $tmpconfig, config
         cc2 = ConsulConf.new( $log, $tmpconfig.path )
-        expect( $log ).to receive( :error ).with( "Postupdate command appears to have failed.  Exit status expected: 0, got: 1" )
-        expect( cc2.postupdate ).to eq( false )
+        expect($log ).to receive( :error ).with( "Postupdate command appears to have failed.  Exit status expected: 0, got: 1" )
+        expect(cc2.postupdate ).to eq( false )
     end
     
     it "should properly update a config file without a postupdate" do
@@ -194,23 +204,23 @@ listen service2 0.0.0.0:8081
         rewrite $tmpconfig, config
         cc2 = ConsulConf.new( $log, $tmpconfig.path )
         cleanup
-        expect( cc2.update ).to eq( true )
-        expect( File.exists? config['outfile'] ).to eq( true )
+        expect(cc2.update ).to eq( true )
+        expect(File.exists? config['outfile'] ).to eq( true )
     end
     
     it "should properly update an outdated config file and run postupdate" do
         cleanup
-        expect( cc.update ).to eq( true )
-        expect( File.exists? cc.config['outfile'] ).to eq( true )
-        expect( File.exists? "#{cc.config['outfile']}.copy" ).to eq( true )
+        expect(cc.update ).to eq( true )
+        expect(File.exists? cc.config['outfile'] ).to eq( true )
+        expect(File.exists? "#{cc.config['outfile']}.copy" ).to eq( true )
     end
            
 
     it "should properly not update an up-to-date config file and not run postupdate"  do
         File.unlink "#{cc.config['outfile']}.copy"
-        expect( cc.update ).to eq( true )
-        expect( File.exists? cc.config['outfile'] ).to eq( true )
-        expect( File.exists? "#{cc.config['outfile']}.copy" ).to eq( false )
+        expect(cc.update ).to eq( true )
+        expect(File.exists? cc.config['outfile'] ).to eq( true )
+        expect(File.exists? "#{cc.config['outfile']}.copy" ).to eq( false )
     end
 
 end

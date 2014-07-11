@@ -1,0 +1,25 @@
+AllCops:
+  Exclude:
+    - vendor/**
+    - metadata.rb
+    - tests/ServiceBackends.rspec.rb
+
+SingleSpaceBeforeFirstArg:
+  # This was not allowing lining up arguments to LWRPs. Making it not enabled helps readability.
+  Enabled: false
+
+RedundantReturn:
+  # Allow specifying return at the end of a function even though it is implied. Explicit code is good.
+  Enabled: false
+
+HashSyntax:
+  # Allow the arrow {:hello => "world"} hash syntax and not only the new syntax {hello: "world"}
+  Enabled: false
+
+Encoding:
+  # Don't require utf-8 comments all over
+  Enabled: false
+
+LineLength:
+  # Lots of long config values to break down
+  Max: 120

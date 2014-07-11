@@ -65,11 +65,11 @@ class ServiceBackends
             if check["CheckID"] == 'serfHealth'
                 serf_health = passingStatus? check
             else
-                service_health = ( service_health and passingStatus?( check ) )
+                service_health = service_health && passingStatus?( check ) 
             end
         }
         @log.debug "Combined service #{service} health is #{service_health}, serf health is #{serf_health}"
-        serf_health and service_health
+        serf_health && service_health
     end
 
     def getServiceNodes service

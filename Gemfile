@@ -5,6 +5,7 @@ gem "erubis"
 gem "curb"
 
 group :development do
-    # consul mockup
-    gem "sinatra"
+# consul mockup
+gem "sinatra"
+gem 'rake'
 end
