@@ -1,0 +1,6 @@
+source "https://api.berkshelf.com"
+
+metadata
+
+# cookbook 'rvm', git: 'https://github.com/fnichol/chef-rvm.git', ref: '485e042', protocol: 'https'
+

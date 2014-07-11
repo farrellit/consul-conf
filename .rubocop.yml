@@ -27,3 +27,6 @@ ClassLength:
 
 MethodName:
   EnforcedStyle: camelCase
+
+FileName:
+  Enabled: false

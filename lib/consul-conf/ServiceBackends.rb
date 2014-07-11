@@ -5,6 +5,7 @@ require 'logger'
 
 class ConsulConf
   class ServiceBackends
+    # handle consul polling and provide backend abstraction
     class RestException < Exception
       def initialize(msg = '')
         if msg
@@ -32,9 +33,9 @@ class ConsulConf
         end
         JSON.parse @curler.body_str
     rescue Curl::Err::ConnectionFailedError => e
-      raise RestException.new "Couldn't connect to #{@curler.url}: #{e.message}"
+      raise RestException, "Couldn't connect to #{@curler.url}: #{e.message}"
     rescue JSON::ParserError => e
-      raise RestException.new "Couldn't parse JSON from #{ @curler.url}.  Response : #{ @curler.body_str.inspect }"
+      raise RestException, "Couldn't parse JSON from #{ @curler.url}.  Response : #{ @curler.body_str.inspect }"
       end
     end
 
@@ -65,7 +66,7 @@ class ConsulConf
         if check['CheckID'] == 'serfHealth'
           serf_health = passingStatus? check
         else
-          service_health = service_health && passingStatus?(check)
+          service_health &&= passingStatus?(check)
         end
       }
       @log.debug "Combined service #{service} health is #{service_health}, serf health is #{serf_health}"
@@ -98,9 +99,7 @@ class ConsulConf
       services.each do |service|
         service['servers'] = getServiceNodes service['name']
         if onlypassing
-          service['servers'].select! { |server|
-            server['status'] == 'up'
-          }
+          service['servers'].select! { |server| server['status'] == 'up' }
         end
       end
       services

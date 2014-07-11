@@ -20,28 +20,24 @@ class ConsulConf
   def initialize(log, configfile)
     fail InitError, "log should be of type Logger!  I got a #{log.class.name}." unless log.is_a? Logger
     @log = log
-    initialize_config configfile
+    initializeConfig configfile
     checkConfig
-    initialize_template
+    initializeTemplate
     @backends = ServiceBackends.new @config, @log
   end
 
-  def initialize_config configfile
-    begin
-      @config = JSON.parse File.read(configfile)
-    rescue Errno::ENOENT => e
-      raise InitError.new "Failed to open config file #{configfile}: #{e.message}"
-    rescue JSON::ParserError 
-      raise InitError.new "Failed to parse config file #{configfile} as json.  Contained: '#{File.read configfile}\n'"
-    end
+  def initializeConfig(configfile)
+    @config = JSON.parse File.read(configfile)
+  rescue Errno::ENOENT => e
+    raise InitError.new "Failed to open config file #{configfile}: #{e.message}"
+  rescue JSON::ParserError
+    raise InitError.new "Failed to parse config file #{configfile} as json.  Contained: '#{File.read configfile}\n'"
   end
-  
-  def initialize_template
-    begin
-      @template = Erubis::Eruby.new(File.read @config['template'])
-    rescue Errno::ENOENT => e
-      raise InitError.new "Failed to load ERB template file #{@config['template']}: #{e.message}"
-    end
+
+  def initializeTemplate
+    @template = Erubis::Eruby.new(File.read @config['template'])
+  rescue Errno::ENOENT => e
+    raise InitError.new "Failed to load ERB template file #{@config['template']}: #{e.message}"
   end
 
   def checkConfigOption(opt)
@@ -52,7 +48,7 @@ class ConsulConf
     if checkConfigOption 'postupdate'
       if checkConfigOption 'postupdate_status'
         # use the shell to check
-        system("exit #{@config['postupdate_status'].to_i} ")
+        system("bash -c 'exit #{@config['postupdate_status'].to_i}'")
         postupdate_status = $CHILD_STATUS.exitstatus
         if postupdate_status != @config['postupdate_status']
           @log.warn("Configuration option 'postupdate_status' out of range " \
@@ -115,36 +111,34 @@ class ConsulConf
     return true unless File.exist? @config['outfile']
     outdated = true
     begin
-      oldtmp = create_tempfile( 
-        "#{File.expand_path @config['outfile']}_old", 
+      oldtmp = createTempFile(
+        "#{File.expand_path @config['outfile']}_old",
         remove_comments(File.read("#{File.expand_path @config['outfile']}")))
-      newtmp = create_tempfile(
+      newtmp = createTempFile(
         "#{File.expand_path @config['outfile']}_new",
-        remove_comments(newdata) )
+        remove_comments(newdata))
       outdated = diff(oldtmp.path, newtmp.path)
     ensure
-      [oldtmp, newtmp].each { |tmp| delete_tempfile tmp }
+      [oldtmp, newtmp].each { |tmp| deleteTempFile tmp }
     end
     outdated
   end
 
-  def create_tempfile name, content
+  def createTempFile(name, content)
     tmp = Tempfile.new(name)
     tmp.write content
     tmp.fsync
     tmp
   end
 
-  def delete_tempfile tmp
+  def deleteTempFile(tmp)
     tmp.close
     tmp.unlink
   end
 
   # execute an update
   def update!(new_content)
-    File.open(File.expand_path(@config['outfile']), 'w') { |f|
-      f.write new_content
-    }
+    File.open(File.expand_path(@config['outfile']), 'w') { |f| f.write new_content }
     postupdate
   end
 

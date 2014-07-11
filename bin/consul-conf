@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+require 'consul-conf'
+
+log = Logger.new $stderr
+log.level = Logger::INFO
+unless ARGV[0] 
+  $stderr.puts "Usage: #{$0} configfile"
+  exit 1
+end
+if ConsulConf.new(log, ARGV[0]).update
+  exit 0
+else
+  exit 1
+end

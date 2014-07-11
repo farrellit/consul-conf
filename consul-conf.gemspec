@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.authors     = ['Dan Farrell']
   s.email       = 'dfarrell@bloomhealthco.com'
   s.files       = ['lib/consul-conf.rb', 'lib/consul-conf/ServiceBackends.rb']
+  s.executables = ['consul-conf']
   s.homepage    = 'http://github.com/dfarrell-bloom/consul-conf'
   s.license       = 'MIT'
 
