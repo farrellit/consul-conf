@@ -6,6 +6,7 @@ require 'shellwords'
 require 'erubis'
 require 'English' # for CHILD_STATUS
 
+# use ServiceBackends to determine backends and handle writing templated config file
 class ConsulConf
   attr_reader :config
 
@@ -17,36 +18,37 @@ class ConsulConf
   end
 
   def initialize(log, configfile)
-    fail InitError.new "log should be of type Logger!  I got a #{log.class.name}." unless log.is_a? Logger
+    fail InitError, "log should be of type Logger!  I got a #{log.class.name}." unless log.is_a? Logger
     @log = log
+    initialize_config configfile
+    checkConfig
+    initialize_template
+    @backends = ServiceBackends.new @config, @log
+  end
+
+  def initialize_config configfile
     begin
       @config = JSON.parse File.read(configfile)
-  rescue Errno::ENOENT => e
-    raise InitError.new "Failed to open config file #{configfile}: #{e.message}"
-  rescue JSON::ParserError => e
-    raise InitError.new "Failed to parse config file #{configfile} as json.  Contained: '#{File.read configfile}\n'"
+    rescue Errno::ENOENT => e
+      raise InitError.new "Failed to open config file #{configfile}: #{e.message}"
+    rescue JSON::ParserError 
+      raise InitError.new "Failed to parse config file #{configfile} as json.  Contained: '#{File.read configfile}\n'"
     end
-    checkConfig
+  end
+  
+  def initialize_template
     begin
-     @template = Erubis::Eruby.new(File.read @config['template'])
- rescue Errno::ENOENT => e
-   raise InitError.new "Failed to load ERB template file #{@config['template']}: #{e.message}"
-   end
-    @backends = ServiceBackends.new @config, @log
+      @template = Erubis::Eruby.new(File.read @config['template'])
+    rescue Errno::ENOENT => e
+      raise InitError.new "Failed to load ERB template file #{@config['template']}: #{e.message}"
+    end
   end
 
   def checkConfigOption(opt)
     @config.key? opt
   end
 
-  def checkConfig
-    missing = []
-    %w(template outfile).each do |opt|
-      missing << opt unless checkConfigOption opt
-    end
-    if checkConfigOption 'comment_regex' # perhaps /^\s*#/
-      @config['comment_regex'] = Regexp.new @config['comment_regex']
-    end
+  def check_postupdate
     if checkConfigOption 'postupdate'
       if checkConfigOption 'postupdate_status'
         # use the shell to check
@@ -62,8 +64,19 @@ class ConsulConf
         @config['postupdate_status'] = 0  # a very sane default
       end
     end
+  end
+
+  def checkConfig
+    missing = []
+    %w(template outfile).each do |opt|
+      missing << opt unless checkConfigOption opt
+    end
+    if checkConfigOption 'comment_regex' # perhaps /^\s*#/
+      @config['comment_regex'] = Regexp.new @config['comment_regex']
+    end
+    check_postupdate
     if missing.count > 0
-      fail ConfigError.new('Required Configuration options unspecified: ' +
+      fail ConfigError, ('Required Configuration options unspecified: ' +
           missing.join(' '))
     end
     @log.debug "Loaded configuration options: #{@config.inspect}"
@@ -102,25 +115,29 @@ class ConsulConf
     return true unless File.exist? @config['outfile']
     outdated = true
     begin
-      oldtmp = Tempfile.new(File.expand_path(@config['outfile']) + '_old')
-      newtmp = Tempfile.new(File.expand_path(@config['outfile']) + '_new')
-      olddata = File.read(File.expand_path @config['outfile'])
-      # if configured, remove comments from the files
-      newdata = remove_comments newdata
-      olddata = remove_comments olddata
-      # sync files so we can call diff against
-      oldtmp.write olddata
-      oldtmp.fsync
-      newtmp.write newdata
-      newtmp.fsync
+      oldtmp = create_tempfile( 
+        "#{File.expand_path @config['outfile']}_old", 
+        remove_comments(File.read("#{File.expand_path @config['outfile']}")))
+      newtmp = create_tempfile(
+        "#{File.expand_path @config['outfile']}_new",
+        remove_comments(newdata) )
       outdated = diff(oldtmp.path, newtmp.path)
-  ensure
-    oldtmp.close
-    oldtmp.unlink
-    newtmp.close
-    newtmp.unlink
+    ensure
+      [oldtmp, newtmp].each { |tmp| delete_tempfile tmp }
     end
     outdated
+  end
+
+  def create_tempfile name, content
+    tmp = Tempfile.new(name)
+    tmp.write content
+    tmp.fsync
+    tmp
+  end
+
+  def delete_tempfile tmp
+    tmp.close
+    tmp.unlink
   end
 
   # execute an update

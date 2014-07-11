@@ -37,7 +37,7 @@ Kernel.at_exit do
   chk.url = 'http://localhost:8500/mock-end'
   begin
     chk.perform
-rescue => e
+  rescue => e
   end
   Process.wait websvr_pid
 end

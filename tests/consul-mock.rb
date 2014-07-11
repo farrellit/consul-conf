@@ -19,7 +19,7 @@ get '/v1/catalog/node/consul-client' do
 end
 
 get '/v1/health/node/consul-client' do
-<<-eof
+  <<-eof
   [{"Notes":"","ServiceName":"","Status":"passing","ServiceID":"",\
   "Output":"","CheckID":"serfHealth","Node":"consul-client",\
   "Name":"Serf Health Status"},{"Notes":"","ServiceName":"service1",\
@@ -33,11 +33,13 @@ eof
 end
 
 get '/v1/catalog/service/service1' do
-  '[{"Node":"consul-client","Address":"10.1.2.3","ServiceID":"service1","ServiceName":"service1","ServiceTags":["web","s1"],"ServicePort":80}]'
+  '[{"Node":"consul-client","Address":"10.1.2.3","ServiceID":"service1","ServiceName":"service1",
+  "ServiceTags":["web","s1"],"ServicePort":80}]'
 end
 
 get '/v1/catalog/service/service2' do
-  '[{"Node":"consul-client","Address":"10.1.2.3","ServiceID":"service2","ServiceName":"service2","ServiceTags":["web","s2"],"ServicePort":81}]'
+  '[{"Node":"consul-client","Address":"10.1.2.3","ServiceID":"service2","ServiceName":"service2",
+  "ServiceTags":["web","s2"],"ServicePort":81}]'
 end
 
 get '/mock-ready' do

@@ -21,7 +21,7 @@ end
 
 ### Run Tests
 
-log = Logger.new $STDERR
+log = Logger.new $stderr
 log.level = Logger::DEBUG
 tmpconfig = Tempfile.new 'tmpconfig'
 
@@ -29,6 +29,7 @@ def valid_config
   JSON.parse File.read('config.json')
 end
 
+# generate only one time, so tets don't fail because of sec. change
 class ATime
   @@time = nil
   def initialize
@@ -62,7 +63,7 @@ end
 def rewrite(tmpfile, data)
   tmpfile.truncate 0
   tmpfile.rewind
-  tmpfile.write ( [Hash, Array].include?(data.class) ? data.to_json : data)
+  tmpfile.write([Hash, Array].include?(data.class) ? data.to_json : data)
   tmpfile.fsync
   tmpfile.rewind
 end
@@ -73,8 +74,8 @@ describe ConsulConf do
     expect { ConsulConf.new log, '' }.to raise_error ConsulConf::InitError
     tmpconfig.write 'This is not valid json'
     expect { ConsulConf.new log, tmpconfig.path }.to raise_error ConsulConf::InitError
-    rewrite tmpconfig,  this: 'is valid json, but not the expected json',
-                         these: %w(are an array of words)
+    rewrite tmpconfig, this: 'is valid json, but not the expected json',
+                       these: %w(are an array of words)
     expect { ConsulConf.new log, tmpconfig.path }.to raise_error ConsulConf::ConfigError
   end
 
@@ -148,7 +149,7 @@ listen service2 0.0.0.0:8081
     f2 = File.open('f2', 'w+')
     rewrite f1, "This is a bunch of content that is not the same.  #{rand}"
     rewrite f2, "This is a bunch of content that is not the same.  #{rand}"
-    expect(f2.read == f2.read).to eq(false)
+    expect(f1.read == f2.read).to eq(false)
     expect(log).to receive('debug').with('Executing diff command: diff f1 f2')
     expect(cc.diff(f1.path, f2.path)).to eq(true)
     [f1, f2].each do |f|
@@ -158,7 +159,9 @@ listen service2 0.0.0.0:8081
   end
 
   it 'should warn on a failed diff ( ie due to missing file )' do
-    expect(log).to receive('error').with('Diff appears to have failed: unexpected return status 2(it is assumed that the files are different)')
+    expect(log).to receive('error').with(
+      'Diff appears to have failed: unexpected return status 2(it is assumed that the files are different)'
+    )
     expect(cc.diff('/tmp/noexist1', '/tmp/noexist2')).to eq(true)
   end
 
