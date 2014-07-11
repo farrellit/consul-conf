@@ -19,7 +19,17 @@ get '/v1/catalog/node/consul-client' do
 end
 
 get '/v1/health/node/consul-client' do
-  '[{"Notes":"","ServiceName":"","Status":"passing","ServiceID":"","Output":"","CheckID":"serfHealth","Node":"consul-client","Name":"Serf Health Status"},{"Notes":"","ServiceName":"service1","Status":"passing","ServiceID":"service1","Output":"","CheckID":"service:service1","Node":"consul-client","Name":"Service \'service1\' check"},{"Notes":"","ServiceName":"service2","Status":"failing","ServiceID":"service2","Output":"","CheckID":"service:service2","Node":"consul-client","Name":"Service \'service2\' check"}]'
+<<-eof
+  [{"Notes":"","ServiceName":"","Status":"passing","ServiceID":"",\
+  "Output":"","CheckID":"serfHealth","Node":"consul-client",\
+  "Name":"Serf Health Status"},{"Notes":"","ServiceName":"service1",\
+  "Status":"passing","ServiceID":"service1","Output":"",\
+  "CheckID":"service:service1","Node":"consul-client","Name":\
+  "Service \'service1\' check"},{"Notes":"","ServiceName":"service2",\
+  "Status":"failing","ServiceID":"service2","Output":"",\
+  "CheckID":"service:service2","Node":"consul-client",\
+  "Name":"Service \'service2\' check"}]
+eof
 end
 
 get '/v1/catalog/service/service1' do

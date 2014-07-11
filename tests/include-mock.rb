@@ -18,7 +18,7 @@ begin
 rescue Curl::Err::ConnectionFailedError
   if Process.wait(websvr_pid, Process::WNOHANG) == websvr_pid
     puts 'Webserver app has failed to execute.'
-    exit -1
+    exit 1
   end
   sleep 0.2
   retry
@@ -28,7 +28,7 @@ rescue WaitException => e
   retry
 rescue Errno::ESRCH => e
   $stderr.puts 'PID not found: webserver startup failed'
-  exit -1
+  exit 1
 end
 
 ### Cleanup webserver thread at exit

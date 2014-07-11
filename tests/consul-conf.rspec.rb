@@ -21,10 +21,9 @@ end
 
 ### Run Tests
 
-$log = Logger.new $STDERR
-$log.level = Logger::DEBUG
-$tmpconfig = Tempfile.new 'tmpconfig'
-# $tmpconfig = File.open "/tmp/config", "w+"
+log = Logger.new $STDERR
+log.level = Logger::DEBUG
+tmpconfig = Tempfile.new 'tmpconfig'
 
 def valid_config
   JSON.parse File.read('config.json')
@@ -71,12 +70,12 @@ end
 describe ConsulConf do
   it 'should raise expected errors on bad invocation' do
     expect { ConsulConf.new 'log', nil }.to raise_error ConsulConf::InitError
-    expect { ConsulConf.new $log, '' }.to raise_error ConsulConf::InitError
-    $tmpconfig.write 'This is not valid json'
-    expect { ConsulConf.new $log, $tmpconfig.path }.to raise_error ConsulConf::InitError
-    rewrite $tmpconfig,  this: 'is valid json, but not the expected json',
+    expect { ConsulConf.new log, '' }.to raise_error ConsulConf::InitError
+    tmpconfig.write 'This is not valid json'
+    expect { ConsulConf.new log, tmpconfig.path }.to raise_error ConsulConf::InitError
+    rewrite tmpconfig,  this: 'is valid json, but not the expected json',
                          these: %w(are an array of words)
-    expect { ConsulConf.new $log, $tmpconfig.path }.to raise_error ConsulConf::ConfigError
+    expect { ConsulConf.new log, tmpconfig.path }.to raise_error ConsulConf::ConfigError
   end
 
   it 'should error about missing config file sections' do
@@ -84,31 +83,31 @@ describe ConsulConf do
     %w(template outfile).each do |sect|
       config.delete sect
     end
-    rewrite $tmpconfig, config
-    expect { ConsulConf.new $log, $tmpconfig }.to raise_error ConsulConf::ConfigError
+    rewrite tmpconfig, config
+    expect { ConsulConf.new log, tmpconfig }.to raise_error ConsulConf::ConfigError
   end
 
   [-1, 256, 1000, -1000, -256, -255].each do |status|
     it 'should warn on invalid postupdate_status' do
       config = valid_config
       config['postupdate_status'] = status
-      rewrite $tmpconfig, config
-      expect($log).to receive('warn').with("Configuration option 'postupdate_status' out of range ( exit status is 8 bit unsigned integer ).  #{status} will never be an exit status")
-      ConsulConf.new $log, $tmpconfig
+      rewrite tmpconfig, config
+      expect(log).to receive('warn').with("Configuration option 'postupdate_status' out of range ( exit status is 8 bit unsigned integer ).  #{status} will never be an exit status")
+      ConsulConf.new log, tmpconfig
     end
   end
 
   it "should set a default postupdate_status if one isn't set" do
     config = valid_config
     config.delete 'postupdate_status'
-    rewrite $tmpconfig, config
-    cc = ConsulConf.new $log, $tmpconfig
+    rewrite tmpconfig, config
+    cc = ConsulConf.new log, tmpconfig
     expect(cc.config['postupdate_status']).to eq(0)
   end
 
   cc = nil
   it 'should initialize successfully with a proper config file' do
-    cc = ConsulConf.new $log, 'config.json'
+    cc = ConsulConf.new log, 'config.json'
   end
 
   it 'should properly load a regex for the comment_regex' do
@@ -150,7 +149,7 @@ listen service2 0.0.0.0:8081
     rewrite f1, "This is a bunch of content that is not the same.  #{rand}"
     rewrite f2, "This is a bunch of content that is not the same.  #{rand}"
     expect(f2.read == f2.read).to eq(false)
-    expect($log).to receive('debug').with('Executing diff command: diff f1 f2')
+    expect(log).to receive('debug').with('Executing diff command: diff f1 f2')
     expect(cc.diff(f1.path, f2.path)).to eq(true)
     [f1, f2].each do |f|
       f.close
@@ -159,7 +158,7 @@ listen service2 0.0.0.0:8081
   end
 
   it 'should warn on a failed diff ( ie due to missing file )' do
-    expect($log).to receive('error').with('Diff appears to have failed: unexpected return status 2(it is assumed that the files are different)')
+    expect(log).to receive('error').with('Diff appears to have failed: unexpected return status 2(it is assumed that the files are different)')
     expect(cc.diff('/tmp/noexist1', '/tmp/noexist2')).to eq(true)
   end
 
@@ -190,17 +189,17 @@ listen service2 0.0.0.0:8081
   it 'should log an error and update should return false if the postupdate status is not expected' do
     config = valid_config
     config['postupdate'] = 'false'  ## that is, the false command
-    rewrite $tmpconfig, config
-    cc2 = ConsulConf.new($log, $tmpconfig.path)
-    expect($log).to receive(:error).with('Postupdate command appears to have failed.  Exit status expected: 0, got: 1')
+    rewrite tmpconfig, config
+    cc2 = ConsulConf.new(log, tmpconfig.path)
+    expect(log).to receive(:error).with('Postupdate command appears to have failed.  Exit status expected: 0, got: 1')
     expect(cc2.postupdate).to eq(false)
   end
 
   it 'should properly update a config file without a postupdate' do
     config = valid_config
     config.delete 'postupdate'
-    rewrite $tmpconfig, config
-    cc2 = ConsulConf.new($log, $tmpconfig.path)
+    rewrite tmpconfig, config
+    cc2 = ConsulConf.new(log, tmpconfig.path)
     cleanup
     expect(cc2.update).to eq(true)
     expect(File.exist? config['outfile']).to eq(true)
