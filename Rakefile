@@ -1,7 +1,7 @@
 
 task :test do
   Dir.chdir 'tests' do
-    specs = %w( ServiceBackends ConsulConf ).each do |c|
+    specs = %w( service-backends consul-conf ).each do |c|
       sh "rspec #{c}.rspec.rb"
     end
     puts "\033[0;1;32m" << "All tests passing!  \

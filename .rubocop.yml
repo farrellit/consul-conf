@@ -2,7 +2,6 @@ AllCops:
   Exclude:
     - vendor/**
     - metadata.rb
-    - tests/**
 
 RedundantReturn:
   # Allow specifying return at the end of a function even though it is implied. Explicit code is good.
