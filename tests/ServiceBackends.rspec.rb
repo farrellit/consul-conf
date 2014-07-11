@@ -3,7 +3,7 @@ require 'json'
 require 'logger'
 require 'curb'
 
-require_relative "../lib/ServiceBackends.rb"
+require_relative "../lib/consul-conf/ServiceBackends.rb"
 
 ### Start up webserver and wait for it to be ready
 
@@ -17,12 +17,12 @@ log.level = Logger::DEBUG
 
 $sb = nil
 
-describe ServiceBackends do
+describe ConsulConf::ServiceBackends do
     it 'should initialize with config and log' do
-        $sb = ServiceBackends.new config, log
+        $sb = ConsulConf::ServiceBackends.new config, log
     end
-    it 'should raise ServiceBackends::RestException on bad url' do
-        expect{ $sb.getUrl '/bad/url' }.to raise_error( ServiceBackends::RestException )
+    it 'should raise ConsulConf::ServiceBackends::RestException on bad url' do
+        expect{ $sb.getUrl '/bad/url' }.to raise_error( ConsulConf::ServiceBackends::RestException )
     end
     it 'should return array from health check url' do
         res = $sb.getUrl '/v1/health/node/consul-client' 

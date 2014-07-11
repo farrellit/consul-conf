@@ -3,6 +3,7 @@ require 'json'
 require 'curb'
 require 'logger'
 
+class ConsulConf
 class ServiceBackends
 
     class RestException < Exception
@@ -23,7 +24,7 @@ class ServiceBackends
     end
 
     def getUrl path
-        path = "/path" unless path[0] == "/"
+        path = "/#{path}" unless path[0] == "/"
         @curler.url = "#{@base_url}#{path}"
         @log.debug "Pulling #{@curler.url}"
         begin
@@ -107,4 +108,4 @@ class ServiceBackends
     end
 
 end
-
+end

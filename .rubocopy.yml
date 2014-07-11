@@ -2,7 +2,7 @@ AllCops:
   Exclude:
     - vendor/**
     - metadata.rb
-    - tests/ServiceBackends.rspec.rb
+    - tests/**
 
 SingleSpaceBeforeFirstArg:
   # This was not allowing lining up arguments to LWRPs. Making it not enabled helps readability.

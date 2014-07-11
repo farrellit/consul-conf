@@ -1,5 +1,5 @@
 
-require_relative 'ServiceBackends.rb'
+require_relative 'consul-conf/ServiceBackends.rb'
 
 require 'tempfile'
 require 'shellwords'
