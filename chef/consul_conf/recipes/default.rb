@@ -15,6 +15,7 @@ end
   gawk libyaml-dev libsqlite3-dev sqlite3 autoconf 
   libgdbm-dev libncurses5-dev automake libtool bison pkg-config libffi-dev
   libcurl4-openssl-dev
+  g++ make
 ).each do |pkg|
   package pkg
 end
