@@ -34,7 +34,7 @@ remote_file gemfile  do
 end
 
 bash 'install gem for user' do
-  code "sudo -i -u #{node[:consul_conf][:user]} gem install /tmp/consul-conf-0.1.0.gem"
+  code "sudo -i -u #{node[:consul_conf][:user]} gem install #{gemfile}"
 end
 
 file gemfile do

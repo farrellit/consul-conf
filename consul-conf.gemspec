@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'consul-conf'
-  s.version     = '0.1.0'
-  s.date        = '2014-07-11'
+  s.version     = '0.1.1'
+  s.date        = '2014-07-16'
   s.summary     = 'generate config files from consul discovered nodes and specified services'
   s.description = 'Use the consul REST API to query node status for specified services, \
     then pass this data to a template and handle writing out \

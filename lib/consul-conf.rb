@@ -16,6 +16,8 @@ class ConsulConf
   end
   class ConfigError < ConsulConfException
   end
+  class TempFileError < ConsulConfException
+  end
 
   def initialize(log, configfile)
     fail InitError, "log should be of type Logger!  I got a #{log.class.name}." unless log.is_a? Logger
@@ -110,6 +112,7 @@ class ConsulConf
   def outdated?(newdata)
     return true unless File.exist? @config['outfile']
     outdated = true
+    oldtmp = newtmp = nil
     begin
       oldtmp = createTempFile(
         "#{File.expand_path @config['outfile']}_old",
@@ -118,14 +121,17 @@ class ConsulConf
         "#{File.expand_path @config['outfile']}_new",
         remove_comments(newdata))
       outdated = diff(oldtmp.path, newtmp.path)
-    ensure
-      [oldtmp, newtmp].each { |tmp| deleteTempFile tmp }
+    ensure 
+      [oldtmp, newtmp].each { |tmp| deleteTempFile tmp if tmp }
     end
     outdated
   end
 
   def createTempFile(name, content)
-    tmp = Tempfile.new(name)
+    tmp = Tempfile.new(path = File.join("/tmp", File.basename(name)))
+    unless tmp
+      fail TempFileError, "Couldn't create temp file for #{path}"
+    end
     tmp.write content
     tmp.fsync
     tmp
