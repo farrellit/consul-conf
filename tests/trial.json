@@ -1,0 +1,31 @@
+{ 
+  "template": "../templates/haproxy.cfg.erb",
+  "outfile": "output.txt",
+  "comment_regex": "^\\s*#",
+  "postupdate": "cp output.txt output.txt.copy",
+  "postupdate_status": 0,
+  "services": [ 
+     {
+        "name": "bloomhealth",
+        "port": 18080,
+        "cookie": true,
+        "check": "inter 3000 rise 2 fall 3 maxconn 255",
+        "options": [ 
+            "httpchk GET /ping"
+        ]
+    },
+    {
+        "name": "MemberService",
+        "port": 8092,
+        "cookie": false,
+        "check": "port 8093 inter 3000 rise 2 fall 3 maxconn 255",
+        "options": [ 
+            "httpchk GET /healthcheck"
+        ]
+    }
+  ],
+  "consul": {
+    "host": "vagrant.moolb.com", 
+    "port": 8500
+  }
+}
