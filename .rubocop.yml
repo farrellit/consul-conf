@@ -1,0 +1,32 @@
+AllCops:
+  Exclude:
+    - vendor/**
+    - metadata.rb
+    - tests/**
+RedundantReturn:
+  # Allow specifying return at the end of a function even though it is implied. Explicit code is good.
+  Enabled: false
+
+HashSyntax:
+  # Allow the arrow {:hello => "world"} hash syntax and not only the new syntax {hello: "world"}
+  Enabled: false
+
+Encoding:
+  # Don't require utf-8 comments all over
+  Enabled: false
+
+LineLength:
+  # Lots of long config values to break down
+  Max: 120
+
+MethodLength: 
+  Max: 20
+
+ClassLength:
+  Max: 200
+
+MethodName:
+  EnforcedStyle: camelCase
+
+FileName:
+  Enabled: false

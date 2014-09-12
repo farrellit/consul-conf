@@ -1,0 +1,72 @@
+{ 
+  "services": [ 
+     {
+        "name": "bloomhealth",
+        "port": 18080,
+        "cookie": true,
+        "check": "inter 3000 rise 2 fall 3 maxconn 255",
+        "options": [ 
+            "httpchk GET /ping"
+        ]
+    },
+    {
+        "name": "bhbo",
+        "port": 19090,
+        "cookie": true,
+        "check": "inter 3000 rise 2 fall 3 maxconn 255",
+        "options": [ 
+            "httpchk GET /ping"
+        ]
+    },
+    {
+        "name": "consumer",
+        "port": 18082,
+        "cookie": true,
+        "check": "inter 3000 rise 2 fall 3 maxconn 255",
+        "options": [ 
+            "httpchk GET /app/consumer/ping"
+        ]
+    },
+    {
+        "name": "auth",
+        "port": 18084,
+        "cookie": true,
+        "check": "inter 3000 rise 2 fall 3 maxconn 255",
+        "options": [ 
+            "httpchk GET /app/auth/ping"
+        ]
+    },
+    {
+        "name": "ops",
+        "port": 18098,
+        "cookie": true,
+        "check": "inter 3000 rise 2 fall 3 maxconn 255",
+        "options": [ 
+            "httpchk GET /app/ops/ping"
+        ]
+    },
+    {
+        "name": "cas",
+        "port": 18100,
+        "cookie": true,
+        "check": "inter 3000 rise 2 fall 3 maxconn 255",
+        "options": [ 
+            "httpchk GET /app/cas/bloom/ping"
+        ]
+    },
+    {
+        "name": "nexus",
+        "port": 18110,
+        "cookie": true,
+        "check": "inter 3000 rise 2 fall 3 maxconn 255",
+        "options": [ 
+            "httpchk GET /app/nexus/ping"
+        ]
+    }
+  ],
+  "consul": {
+    "//host": "192.168.70.7", 
+    "host": "localhost", 
+    "port": 8500
+  }
+}

@@ -1,0 +1,22 @@
+# This is a test template to check rendering generated <%= ATime.new %>
+
+<% services.each do |service| %>
+listen <%= service["name"] %> 0.0.0.0:<%= service["port"] %>
+<%  if service["cookie"] %>
+  cookie <%= service["name"] %>_svr insert indirect nocache
+<%  end %>
+<%  if service["options"].kind_of? Array
+        service["options"].each do |option| %>      
+  option <%= option %>
+<%      end 
+    end 
+  service["servers"].each do |server| %>
+  server <%= server["name"] %> <%= server["ip"] %>:<%= server["port"] %> <% 
+    if service["cookie"] %> cookie <%= server["name"] %> <% end 
+    if service["check"]  %> check <%= service["check"] %> <% end
+    server["health_checks"].each do |check| %>
+  # Check ID <%= check['CheckID'] %>, "<%= check['Name'] %>", status: <%= check['Status'] -%>
+    <% end %>
+<% end %>
+
+<% end %>
